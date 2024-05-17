@@ -15,19 +15,37 @@ type Dictionary struct {
 
 	entries map[string]string
 	keyBuf  []byte
+
+	replacer *strings.Replacer
 }
 
-func NewDictionary(name string, tabSpaces int) *Dictionary {
-	return &Dictionary{
-		Name:      name,
+type DictionaryConfig struct {
+	Name string
+
+	TabSpaces int
+
+	Replacements map[string]string
+}
+
+func NewDictionary(config DictionaryConfig) *Dictionary {
+	d := &Dictionary{
+		Name:      config.Name,
 		entries:   make(map[string]string, 64),
 		keyBuf:    make([]byte, 256),
-		tabSpaces: strings.Repeat(" ", tabSpaces),
+		tabSpaces: strings.Repeat(" ", config.TabSpaces),
 	}
+	if len(config.Replacements) != 0 {
+		var pairs []string
+		for key, val := range config.Replacements {
+			pairs = append(pairs, key, val)
+		}
+		d.replacer = strings.NewReplacer(pairs...)
+	}
+	return d
 }
 
-func ParseDictionary(name string, tabSpaces int, data []byte) (*Dictionary, error) {
-	dict := NewDictionary(name, tabSpaces)
+func ParseDictionary(config DictionaryConfig, data []byte) (*Dictionary, error) {
+	dict := NewDictionary(config)
 	err := dict.Load("", data)
 	return dict, err
 }
@@ -76,6 +94,9 @@ func (d *Dictionary) Load(prefix string, data []byte) error {
 				}
 				s := strings.TrimSpace(string(data[sectionBodyBegin:sectionBodyEnd]))
 				s = strings.ReplaceAll(s, `\t`, d.tabSpaces)
+				if d.replacer != nil {
+					s = d.replacer.Replace(s)
+				}
 				d.entries[sectionKey] = s
 			}
 			sectionKey = nextSectionKey
