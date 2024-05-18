@@ -3,7 +3,7 @@ package glang
 import "testing"
 
 func TestDictGet(t *testing.T) {
-	d := NewDictionary("en", 2)
+	d := NewDictionary(DictionaryConfig{Name: "en", TabSpaces: 2})
 	err := d.Load("", []byte(`
 ##first_part : example1
 ##first_part.second_part : example2
