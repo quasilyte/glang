@@ -110,6 +110,10 @@ func (d *Dictionary) Load(prefix string, data []byte) error {
 	return nil
 }
 
+func (d *Dictionary) Get2(keyParts ...string) (string, bool) {
+	return d.get(d.entries, keyParts...)
+}
+
 func (d *Dictionary) Get(keyParts ...string) string {
 	s, _ := d.get(d.entries, keyParts...)
 	return s
