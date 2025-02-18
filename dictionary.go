@@ -126,6 +126,12 @@ func (d *Dictionary) WalkKeys(f func(k string)) {
 	}
 }
 
+func (d *Dictionary) Map(f func(k, v string) string) {
+	for k, v := range d.entries {
+		d.entries[k] = f(k, v)
+	}
+}
+
 func (d *Dictionary) get(m map[string]string, keyParts ...string) (string, bool) {
 	if len(keyParts) == 1 {
 		return d.getSimple(d.entries, keyParts[0])
